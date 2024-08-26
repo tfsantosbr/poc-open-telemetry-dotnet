@@ -2,5 +2,9 @@
 
 POST {{orders_api_adresss}}/orders/
 Accept: application/json
+Content-Type: application/json
+
+{
+}
 
 ###
