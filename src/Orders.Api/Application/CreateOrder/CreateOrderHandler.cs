@@ -34,7 +34,7 @@ public class CreateOrderHandler(ILogger<CreateOrderHandler> logger)
         using var connection = factory.CreateConnection();
         using var channel = connection.CreateModel();
 
-        string queueName = "order-created";
+        string queueName = "order-queue";
 
         channel.QueueDeclare(
             queue: queueName,
