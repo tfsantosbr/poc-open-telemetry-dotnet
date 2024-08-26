@@ -1,4 +1,21 @@
 services:
+  # INFRASTRUCTURE
+
+  rabbit:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 1s
+      timeout: 10s
+      retries: 10
+    networks:
+      - microservices
+
+  # OBSERVABILITY
+
   otel-collector:
     image: otel/opentelemetry-collector-contrib
     container_name: ms-otel-collector

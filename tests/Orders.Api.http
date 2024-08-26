@@ -1,0 +1,6 @@
+@orders_api_adresss = http://localhost:5189
+
+POST {{orders_api_adresss}}/orders/
+Accept: application/json
+
+###
