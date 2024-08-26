@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Orders.Consumer.Models;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -9,8 +10,8 @@ public class Worker : BackgroundService
 {
     private const string QUEUE_NAME = "order-queue";
     private readonly ILogger<Worker> _logger;
-    private IConnection _connection;
-    private IModel _channel;
+    private readonly IConnection _connection;
+    private readonly IModel _channel;
 
     public Worker(ILogger<Worker> logger)
     {
@@ -18,9 +19,9 @@ public class Worker : BackgroundService
 
         var factory = new ConnectionFactory()
         {
-            HostName = "localhost",  // Substitua pelo endereço do seu RabbitMQ
-            UserName = "guest",      // Substitua pelo seu usuário
-            Password = "guest"       // Substitua pela sua senha
+            HostName = "localhost",
+            UserName = "guest",
+            Password = "guest"
         };
 
         _connection = factory.CreateConnection();
@@ -37,8 +38,9 @@ public class Worker : BackgroundService
         {
             var body = ea.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
+            var createOrderMessage = JsonSerializer.Deserialize<CreateOrderMessage>(message);
 
-            _logger.LogInformation(" [x] Received {message}", message);
+            _logger.LogInformation("Processed order message with Id: {orderId}", createOrderMessage!.OrderId);
         };
 
         _channel.BasicConsume(queue: QUEUE_NAME, autoAck: true, consumer: consumer);
