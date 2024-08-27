@@ -54,6 +54,9 @@ services:
       - 13133:13133 # health_check extension
       - 4317:4317 # OTLP gRPC receiver
       - 4318:4318 # OTLP http receiver
+    environment:
+      - DD_API_KEY=${DD_API_KEY}
+      - DD_SITE=${DD_SITE}
     networks:
       - microservices
 

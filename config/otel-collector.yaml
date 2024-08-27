@@ -9,9 +9,40 @@ receivers:
 exporters:
   debug:
     verbosity: detailed
+  datadog:
+    api:
+      site: ${env:DD_SITE}
+      key: ${env:DD_API_KEY}
+    traces:
+      trace_buffer: 500
+
+connectors:
+  datadog/connector:
 
 processors:
   batch:
+  resourcedetection:
+    detectors: [env, system]
+    system:
+      resource_attributes:
+        os.description:
+          enabled: true
+        host.arch:
+          enabled: true
+        host.cpu.vendor.id:
+          enabled: true
+        host.cpu.family:
+          enabled: true
+        host.cpu.model.id:
+          enabled: true
+        host.cpu.model.name:
+          enabled: true
+        host.cpu.stepping:
+          enabled: true
+        host.cpu.cache.l2.size:
+          enabled: true
+    timeout: 2s
+    override: false
 
 extensions:
   health_check:
@@ -24,12 +55,12 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, datadog/connector, datadog]
     metrics:
-      receivers: [otlp]
+      receivers: [otlp, datadog/connector]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, datadog]
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, datadog]
