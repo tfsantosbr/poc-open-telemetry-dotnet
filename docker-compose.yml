@@ -8,6 +8,9 @@ services:
       context: src/Orders.Api
     ports:
       - 8081:8080
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     networks:
       - microservices
 
@@ -16,6 +19,9 @@ services:
     container_name: ms-orders-consumer
     build:
       context: src/Orders.Consumer
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     networks:
       - microservices
 
