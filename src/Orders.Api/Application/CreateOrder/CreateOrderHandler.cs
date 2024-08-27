@@ -1,32 +1,40 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Orders.Api.Metrics;
 using RabbitMQ.Client;
 
 namespace Orders.Api.Application.CreateOrder;
 
-public class CreateOrderHandler(ILogger<CreateOrderHandler> logger)
+public class CreateOrderHandler(ILogger<CreateOrderHandler> logger, OrderMetrics metrics)
 {
     public async Task<CreateOrderResponse> Handle(CreateOrderRequest request)
     {
-        var orderId = Guid.NewGuid();
+        var response = await CreateOrderRequest();
 
+        return response;
+    }
+
+    private Task<CreateOrderResponse> CreateOrderRequest()
+    {
         logger.LogInformation("Creating order request...");
 
-        var message = new CreateOrderMessage(orderId);
+        var orderId = Guid.NewGuid();
 
-        SendMessage(message);
+        SendMessage(new CreateOrderMessage(orderId));
 
-        logger.LogInformation("Order request created.");
+        metrics.SumOrderRequest();
 
-        return await Task.FromResult(new CreateOrderResponse(orderId, "Pending"));
+        logger.LogInformation("Order request completed.");
+
+        return Task.FromResult(new CreateOrderResponse(orderId, "Pending"));
     }
 
     public void SendMessage(CreateOrderMessage message)
     {
         var factory = new ConnectionFactory()
         {
-            HostName = "localhost",
+            HostName = "host.docker.internal",
             UserName = "guest",
             Password = "guest"
         };
