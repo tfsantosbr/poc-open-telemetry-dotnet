@@ -57,6 +57,39 @@ services:
     networks:
       - microservices
 
+  seq:
+    image: datalust/seq
+    container_name: ms-seq
+    ports:
+      - "5000:80"
+      - "5341:5341"
+    environment:
+      ACCEPT_EULA: Y
+    networks:
+      - microservices
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: ms-jaeger
+    restart: always
+    ports:
+      - "16686:16686"
+      - "14268"
+      - "14250"
+    networks:
+      - microservices
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: ms-zipkin
+    environment:
+      - JAVA_OPTS=-Xms1024m -Xmx1024m -XX:+ExitOnOutOfMemoryError
+    restart: always
+    ports:
+      - "9411:9411"
+    networks:
+      - microservices
+
 networks:
   microservices:
     driver: bridge

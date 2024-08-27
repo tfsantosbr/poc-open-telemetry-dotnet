@@ -9,6 +9,15 @@ receivers:
 exporters:
   debug:
     verbosity: detailed
+  otlphttp: # seq
+    endpoint: http://seq:5341/ingest/otlp
+  otlp: # jaeger
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+  zipkin: # zipkin
+    endpoint: "http://zipkin:9411/api/v2/spans"
+    format: proto
 
 processors:
   batch:
@@ -24,7 +33,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, otlp, zipkin]
     metrics:
       receivers: [otlp]
       processors: [batch]
@@ -32,4 +41,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, otlphttp]
