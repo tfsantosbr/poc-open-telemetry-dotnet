@@ -9,6 +9,16 @@ receivers:
 exporters:
   debug:
     verbosity: detailed
+  prometheus:
+    endpoint: 0.0.0.0:8889
+  otlphttp:
+    endpoint: http://loki:3100/otlp
+    tls:
+      insecure: true
+  otlp:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
 
 processors:
   batch:
@@ -24,12 +34,12 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, otlp]
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, prometheus]
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, otlphttp]
