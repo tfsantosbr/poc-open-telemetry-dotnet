@@ -57,6 +57,91 @@ services:
     networks:
       - microservices
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.2
+    container_name: elasticsearch
+    ports:
+      - 9200:9200
+    networks:
+      - microservices
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=changeme
+    healthcheck:
+      test: curl -s http://localhost:9200 | grep -q 'missing authentication credentials'
+      interval: 10s
+      timeout: 10s
+
+  setup-kibana-password:
+    image: alpine
+    container_name: setup-kibana-password
+    networks:
+      - microservices
+    command: >
+      sh -c '
+        apk --no-cache add curl &&
+        curl -s -X POST -u "elastic:changeme" -H "Content-Type: application/json" \
+        http://elasticsearch:9200/_security/user/kibana_system/_password -d "{\"password\":\"changeme\"}" | grep -q "^{}"
+      '
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.2
+    container_name: kibana
+    volumes:
+      - ./config/kibana.yaml:/usr/share/kibana/config/kibana.yml:ro
+    ports:
+      - 5601:5601
+    networks:
+      - microservices
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=changeme
+    healthcheck:
+      test: curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      - setup-kibana-password
+
+  apm-server:
+    container_name: apm-server
+    image: docker.elastic.co/apm/apm-server:8.13.2
+    cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
+    cap_drop: ["ALL"]
+    ports:
+      - 8200:8200
+    networks:
+      - microservices
+    command: >
+      apm-server -e
+         -E apm-server.rum.enabled=true
+         -E setup.kibana.host=kibana:5601
+         -E setup.template.settings.index.number_of_replicas=0
+         -E apm-server.kibana.enabled=true
+         -E apm-server.kibana.host=kibana:5601
+         -E apm-server.kibana.protocol=http
+         -E output.elasticsearch.hosts=["elasticsearch:9200"]
+         -E apm-server.kibana.username=elastic
+         -E apm-server.kibana.password=changeme
+         -E output.elasticsearch.username=elastic
+         -E output.elasticsearch.password=changeme
+    healthcheck:
+      test: curl -s -I http://localhost:8200 | grep -q 'HTTP/1.1 200 OK'
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+
 networks:
   microservices:
     driver: bridge

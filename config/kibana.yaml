@@ -1,0 +1,23 @@
+server.host: 0.0.0.0
+
+xpack.fleet.packages:
+  - name: apm
+    version: latest
+
+xpack.fleet.agentPolicies:
+  - name: Default Policy
+    id: 1
+    is_default: true
+    package_policies:
+      - name: APM Policy
+        package:
+          name: apm
+        inputs:
+          - type: apm
+            vars:
+              - name: host
+                value: "localhost:8200"
+              - name: url
+                value: "http://localhost:8200"
+
+xpack.profiling.enabled: true
