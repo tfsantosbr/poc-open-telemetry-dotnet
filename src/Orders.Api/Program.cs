@@ -4,13 +4,14 @@ using OpenTelemetry.Trace;
 using Orders.Api.Application.CreateOrder;
 using Orders.Api.Metrics;
 using Serilog;
-using Serilog.Events;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 
-const string serviceName = "orders-api";
-
 var builder = WebApplication.CreateBuilder(args);
+
+const string serviceName = "orders-api";
+var serviceNamespace = builder.Environment.EnvironmentName;
+var serviceInstance = Environment.MachineName;
 
 // Application Dependencies
 
@@ -28,7 +29,9 @@ builder.Services.AddSerilog((services, logger) => logger
         options.Endpoint = "http://host.docker.internal:4317";
         options.ResourceAttributes = new Dictionary<string, object>
         {
-            ["service.name"] = serviceName
+            ["service.name"] = serviceName,
+            ["service.namespace"] = serviceNamespace,
+            ["service.instance.id"] = serviceInstance
         };
     })
 );
