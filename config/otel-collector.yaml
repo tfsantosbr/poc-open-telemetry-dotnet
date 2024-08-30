@@ -9,8 +9,15 @@ receivers:
 exporters:
   debug:
     verbosity: detailed
+  otlp/elastic:
+    endpoint: "${env:ELASTIC_APM_SERVER_ENDPOINT}"
+    headers:
+      Authorization: "Bearer ${env:ELASTIC_APM_SECRET_TOKEN}"
 
 processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 2000
   batch:
 
 extensions:
@@ -23,13 +30,13 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [debug]
+      processors: [batch, memory_limiter]
+      exporters: [debug, otlp/elastic]
     metrics:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [debug]
+      processors: [batch, memory_limiter]
+      exporters: [debug, otlp/elastic]
     logs:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [debug]
+      processors: [batch, memory_limiter]
+      exporters: [debug, otlp/elastic]
