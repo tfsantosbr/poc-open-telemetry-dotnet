@@ -4,6 +4,8 @@ using Serilog;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+// Application Dependencies
+
 builder.Services.AddHostedService<Worker>();
 builder.Services.AddSingleton<OrdersConsumerMetrics>();
 
