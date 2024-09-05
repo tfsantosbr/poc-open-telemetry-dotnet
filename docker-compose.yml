@@ -69,6 +69,55 @@ services:
     networks:
       - microservices
 
+  prometheus:
+    image: prom/prometheus
+    container_name: ms-prometheus
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+    ports:
+      - 9090:9090
+    networks:
+      - microservices
+
+  grafana:
+    image: grafana/grafana
+    container_name: ms-grafana
+    volumes:
+      - ./config/grafana.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "admin"
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    networks:
+      - microservices
+
+  loki:
+    image: grafana/loki:main
+    container_name: ms-loki
+    ports:
+      - 3100:3100
+    volumes:
+      - ./config/loki.yaml:/etc/loki/loki-config.yaml
+    networks:
+      - microservices
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: ms-tempo
+    command: -config.file=/etc/tempo.yaml
+    volumes:
+      - ./config/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - 3200:3200 # tempo
+      - "4317" # otlp grpc
+    networks:
+      - microservices
+
 networks:
   microservices:
     driver: bridge
