@@ -6,6 +6,12 @@ services:
     container_name: ms-orders-api
     build:
       context: src/Orders.Api
+    env_file:
+      - otel-dotnet.env
+    environment:
+      OTEL_SERVICE_NAME: "order-api"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=production,service.version=1.0.0
     ports:
       - 8081:8080
     depends_on:
@@ -19,6 +25,12 @@ services:
     container_name: ms-orders-consumer
     build:
       context: src/Orders.Consumer
+    env_file:
+      - otel-dotnet.env
+    environment:
+      OTEL_SERVICE_NAME: "orders-consumer"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://host.docker.internal:4318"
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=production,service.version=1.0.0
     depends_on:
       rabbitmq:
         condition: service_healthy
