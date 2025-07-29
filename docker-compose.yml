@@ -5,7 +5,8 @@ services:
     image: ms-orders-api
     container_name: ms-orders-api
     build:
-      context: src/Orders.Api
+      context: .
+      dockerfile: src/Orders.Api/Dockerfile
     ports:
       - 5000:8080
     depends_on:
@@ -18,7 +19,8 @@ services:
     image: ms-orders-consumer
     container_name: ms-orders-consumer
     build:
-      context: src/Orders.Consumer
+      context: .
+      dockerfile: src/Orders.Consumer/Dockerfile
     depends_on:
       rabbitmq:
         condition: service_healthy

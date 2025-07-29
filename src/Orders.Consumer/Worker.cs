@@ -45,12 +45,13 @@ public class Worker : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var watch = Stopwatch.StartNew();
-
         var consumer = new EventingBasicConsumer(_channel);
 
         consumer.Received += (model, ea) =>
         {
+            using var activity = _metrics.ActivitySource.StartActivity("ProcessOrderMessage");
+            var watch = Stopwatch.StartNew();
+
             var body = ea.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
             var createOrderMessage = JsonSerializer.Deserialize<CreateOrderMessage>(message);
@@ -59,6 +60,7 @@ public class Worker : BackgroundService
             _correlationContext.SetCorrelationId(correlationId);
 
             watch.Stop();
+            activity?.Stop();
 
             _metrics.RecordOrderProcessingDuration(watch.ElapsedMilliseconds);
 
