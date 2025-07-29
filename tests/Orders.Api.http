@@ -1,4 +1,4 @@
-@orders_api_adresss = http://localhost:5189
+@orders_api_adresss = http://localhost:5000
 
 POST {{orders_api_adresss}}/orders/
 Accept: application/json

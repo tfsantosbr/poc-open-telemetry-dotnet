@@ -16,4 +16,8 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
     <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared.Correlation.OpenTelemetry\Shared.Correlation.OpenTelemetry.csproj" />
+  </ItemGroup>
 </Project>

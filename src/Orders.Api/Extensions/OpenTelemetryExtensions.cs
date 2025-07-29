@@ -3,6 +3,9 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Orders.Api.Metrics;
+using Shared.Correlation.Context;
+using Shared.Correlation.OpenTelemetry.Processors;
+using Shared.Correlation.OpenTelemetry.Extensions;
 
 namespace Orders.Api.Extensions;
 
@@ -30,6 +33,7 @@ public static class OpenTelemetryExtensions
         {
             loggerOptions
                 .SetResourceBuilder(resourceBuilder)
+                .AddCorrelationLogProcessor()
                 .AddOtlpExporter(options =>
                     options.Endpoint = new Uri(otelCollectorEndpoint)
                 );
