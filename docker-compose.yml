@@ -37,7 +37,7 @@ services:
       - 15672:15672
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
-      interval: 1s
+      interval: 3s
       timeout: 10s
       retries: 10
     networks:
@@ -110,4 +110,5 @@ services:
 
 networks:
   microservices:
+    name: ms-network
     driver: bridge
