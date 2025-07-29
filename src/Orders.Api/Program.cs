@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Application Dependencies
 
-builder.AddOpenTelemetryServices(builder.Environment);
+builder.AddOpenTelemetryServices(builder.Environment, builder.Configuration);
 builder.Services.AddScoped<CreateOrderHandler>();
 builder.Services.AddSingleton<OrderMetrics>();
 

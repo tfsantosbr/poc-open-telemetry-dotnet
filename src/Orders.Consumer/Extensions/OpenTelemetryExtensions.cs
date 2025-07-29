@@ -2,9 +2,9 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Orders.Api.Metrics;
+using Orders.Consumer.Metrics;
 
-namespace Orders.Api.Extensions;
+namespace Orders.Consumer.Extensions;
 
 public static class OpenTelemetryExtensions
 {
@@ -40,18 +40,17 @@ public static class OpenTelemetryExtensions
 
         builder.Services.AddOpenTelemetry()
             .WithTracing(tracing => tracing
-                .AddSource(OrderMetrics.ActivitySourceName)
+                .AddSource(OrdersConsumerMetrics.ActivitySourceName)
                 .SetResourceBuilder(resourceBuilder)
-                .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddOtlpExporter(options =>
                     options.Endpoint = new Uri(otelCollectorEndpoint)
                 )
             )
             .WithMetrics(metrics => metrics
-                .AddMeter(OrderMetrics.MeterName)
+                .AddMeter(OrdersConsumerMetrics.MeterName)
                 .SetResourceBuilder(resourceBuilder)
-                .AddAspNetCoreInstrumentation()
+                .AddMeter(OrdersConsumerMetrics.MeterName)
                 .AddRuntimeInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddProcessInstrumentation()
