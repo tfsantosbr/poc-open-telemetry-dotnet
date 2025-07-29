@@ -1,12 +1,13 @@
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Orders.Api.Metrics;
 using RabbitMQ.Client;
+using Shared.Correlation.Context;
 
 namespace Orders.Api.Application.CreateOrder;
 
-public class CreateOrderHandler(ILogger<CreateOrderHandler> logger, OrderMetrics metrics)
+public class CreateOrderHandler(
+    ILogger<CreateOrderHandler> logger, ICorrelationContext correlationContext, OrderMetrics metrics)
 {
     public async Task<CreateOrderResponse> Handle(CreateOrderRequest request)
     {
@@ -54,10 +55,13 @@ public class CreateOrderHandler(ILogger<CreateOrderHandler> logger, OrderMetrics
         string jsonMessage = JsonSerializer.Serialize(message);
         var body = Encoding.UTF8.GetBytes(jsonMessage);
 
+        var properties = channel.CreateBasicProperties();
+        properties.CorrelationId = correlationContext.GetCorrelationId();
+
         channel.BasicPublish(
             exchange: "",
             routingKey: queueName,
-            basicProperties: null,
+            basicProperties: properties,
             body: body);
 
         logger.LogInformation("Order request sent to message broker.");
